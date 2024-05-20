@@ -17,6 +17,7 @@ from utlis import config_font
 from datetime import datetime
 
 
+# Класс с диалоговым окном для добавления новой / изменения существующей задачи
 class TasksDialog(QDialog):
     def __init__(self, project, is_update=False, task: Task=None):
         super().__init__()
@@ -124,7 +125,7 @@ class TasksDialog(QDialog):
         self.setLayout(layout)
         self.show()
         
-        
+    # Обработка нажатия на кнопку "Закрыть окно" (крестик)
     def closeEvent(self, event):
         if self.status == True:
             event.accept()
@@ -139,6 +140,10 @@ class TasksDialog(QDialog):
             else:
                 event.ignore()
                 
+                
+    # Обновление задачи при нажатии на кнопку "Обновить"
+    #
+    # Вызывается на 114 строке
     def update_task(self):
         deadline = self.get_date_from_checkboxes()
         
@@ -154,6 +159,9 @@ class TasksDialog(QDialog):
         self.close()
 
 
+    # Добавляет новую задачу при нажатии на кнопку "Добавить"
+    #
+    # Вызывается на 108 строке
     def add_task(self):
         print("Добавление задачи...")
         self.title_edit.setStyleSheet('''
@@ -204,7 +212,11 @@ class TasksDialog(QDialog):
                            )
             self.status = True
             self.close()
-        
+    
+    
+    # Возвращает дату в формате datetime из checkbox для выбора дат
+    #
+    # Вызывается на 144, 188 строках
     def get_date_from_checkboxes(self):
         deadline_day = self.get_checkbox_value(self.deadline_day_combo)
         deadline_month = self.get_checkbox_value(self.deadline_month_combo)
@@ -213,6 +225,8 @@ class TasksDialog(QDialog):
         deadline_str = f'{deadline_day.currentText()}.{deadline_month.currentText()}.{deadline_year.currentText()}'
         return datetime.strptime(deadline_str, "%d.%m.%Y")
 
+    
+    # Возвращает значение checkbox
     def get_checkbox_value(self, checkbox):
         if checkbox:
             return checkbox

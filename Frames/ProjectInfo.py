@@ -23,6 +23,7 @@ from Frames.TaskDialog import TasksDialog
 from utlis import config_font
 
 
+# Класс-окно с информацией о проекте
 class ProjectWindow(QWidget):
     def __init__(self, project):
         super().__init__()
@@ -30,6 +31,7 @@ class ProjectWindow(QWidget):
         self.init_ui()
         
 
+    # Инициализирует все gui штуки в окне
     def init_ui(self):
         self.setFixedSize(980, 720)
         self.setStyleSheet('background-color: rgb(190, 220, 204)')
@@ -279,6 +281,9 @@ class ProjectWindow(QWidget):
         self.show()    
     
     
+    # Открывает контекстное меню для управления задачами
+    #
+    # Вызывается на 186, 409 строках
     def task_context_menu(self, position: QPoint, button: QPushButton, task: Task):
         context_menu = QMenu(self)
         
@@ -291,17 +296,29 @@ class ProjectWindow(QWidget):
         context_menu.addAction(update_action)
         
         context_menu.exec_(button.mapToGlobal(position))
-        
+    
+    
+    # Открывает диалоговое окно для изменения задачи
+    #
+    # Вызывается на 293 строке 
     def task_update_action(self, task: Task):
         tasks_update = TasksDialog(self.project, True, task)
         tasks_update.exec()
         if tasks_update.status:
             self.update_window()
-        
+    
+    
+    # Открывает диалоговое окно для удаления задачи
+    #
+    # Вызывается на 291 строке 
     def task_delete_action(self, task: Task):
         Task.delete_by_id(task.id)
         self.update_window()
     
+    
+    # Открывает контекстное меня для сортировки
+    #
+    # Вызывается на 260 строке 
     def sort_menu(self):
         self.menu = QMenu(self.sort_button)
 
@@ -325,6 +342,9 @@ class ProjectWindow(QWidget):
         self.sort_button.setMenu(self.menu)
 
 
+    # Сортирует при нажатии на кнопку меню сортировки
+    #
+    # Вызывается на 293 строке 
     def sort_action_triggered(self, action):
         if action == self.action_date_desc:
             tasks = Task.select().where(Task.project_id == self.project.id).order_by(Task.deadline.desc())
@@ -336,19 +356,27 @@ class ProjectWindow(QWidget):
         self.update_window(tasks)
             
     
-    
+    # Поиск задачи по совпадению из поля справа
+    #
+    # Вызывается на 248 строке 
     def search_click(self, text):
         tasks = Task.select().where(Task.name.contains(text))
         self.update_window(tasks)
     
     
+    # Открывает диалоговое окно для добавления задачи
+    #
+    # Вызывается на 254 строке 
     def addTask(self):
         task_dialog = TasksDialog(self.project)
         task_dialog.exec()
         if task_dialog.status:
             self.update_window()
     
-        
+    
+    # Обновляет леер с задачами при выполнении определенного действия
+    #
+    # Вызывается на 308, 316, 356, 364, 374 строках
     def update_window(self, tasks=None):
         
         for i in reversed(range(self.tasks_layout.count())):

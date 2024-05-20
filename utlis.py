@@ -16,12 +16,16 @@ DATE_FORMAT = {
     'декабря': '12',
 }
 
+
+# Установка шрифта для текстов
 def config_font(fonts_size: int) -> QtGui.QFont:
     font = QtGui.QFont()
     font.setFamily('AngelicaC')
     font.setPointSize(fonts_size)
     return font
 
+
+# Парсинг белорусских праздников
 def parse_holidays() -> dict[str, str]:
     try:
         page = request('GET', 'https://pravo.by/gosudarstvo-i-pravo/gosudarstvennye-prazdniki/').text
@@ -57,6 +61,7 @@ def parse_holidays() -> dict[str, str]:
     return output_dates
 
 
+# Подсчет количества дней без учета выходных в переданном диапазоне дат
 def count_weekends(start_date: datetime, end_date: datetime):
     current_date: datetime = start_date
     day_count = 0

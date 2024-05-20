@@ -16,6 +16,7 @@ from utlis import config_font
 from datetime import datetime, date
 
 
+# Класс диалоговое окно для создания новых событий
 class EventDialog(QDialog):
     def __init__(self, parent=None, calendar_id: Calendar=None, choosen_date: date=None):
         super().__init__(parent)
@@ -110,7 +111,9 @@ class EventDialog(QDialog):
         
         self.setLayout(layout)
         self.show()
-        
+    
+    
+    # Обработка нажатия на кнопку "Закрыть окно" (крестик)
     def closeEvent(self, event):
         if self.status == True:
             event.accept()
@@ -124,7 +127,11 @@ class EventDialog(QDialog):
                 event.accept()
             else:
                 event.ignore()
-                
+    
+    
+    # Добавляет новое событие при нажатии на кнопку "Добавить"
+    #
+    # Вызывается на 100 строке
     def add_event(self):
         if not self.title_edit.text():
             self.title_edit.setStyleSheet(LINE_EDIT_ERR)

@@ -1,3 +1,5 @@
+import sys, os
+
 from peewee import (Model, 
                     SqliteDatabase, 
                     TextField, 
@@ -15,6 +17,15 @@ class ProjectStatus:
     IN_PROCESS = 'P'
     COMPLETED = 'C'
     DELAYED = 'D'
+    
+def get_database_path():
+    if hasattr(sys, '_MEIPASS'):
+        # Если приложение запущено из упакованного состояния
+        base_path = os.path.join(sys._MEIPASS, 'worknotes.db')
+    else:
+        # Если приложение запущено в режиме разработки
+        base_path = os.path.join(os.path.dirname(__file__), 'resourses/worknote.db')
+    return base_path
 
 
 db = SqliteDatabase('resourses\\worknotes.db')
@@ -65,3 +76,9 @@ class Event(BaseModel):
     
     
 db.create_tables([Task, Project, WorkSpace, Event, Calendar])
+
+try:
+    Calendar.create(id=1, type='Праздники')
+    Calendar.create(id=2, type='Работа')
+except Exception:
+    None

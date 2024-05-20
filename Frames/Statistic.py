@@ -22,6 +22,8 @@ from utlis import config_font, count_weekends
 my_events = [('Митинги', 'Проекты'), ('Больничные', 'Отпуск')]
 my_hours = [[0, 0], [0, 0]]
 
+
+# Класс виджета Гистограммы
 class HistogramWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -36,6 +38,10 @@ class HistogramWidget(QWidget):
         self.ax.spines['left'].set_color('darkgreen')
         self.ax.spines['right'].set_color('darkgreen')
 
+    
+    # Рисует гистограмму
+    #
+    # Вызывается на 239 строке 
     def plot_histogram(self):
         self.ax.clear()
         e = my_events
@@ -58,6 +64,8 @@ class HistogramWidget(QWidget):
         self.ax.patch.set_facecolor([0.7451, 0.8627, 0.8])
         self.canvas.draw()
 
+
+# Класс-виджет со статистикой
 class Statistic(QWidget):
     def __init__(self):
         super().__init__()
@@ -119,6 +127,10 @@ class Statistic(QWidget):
 
         self.show()
 
+    
+    # Отслеживает нажатие на определенную кнопку и запоминает какой период выбран, а также собирает информацию с БД для этого периода
+    #
+    # Вызывается на 92 строке 
     def handle_period_selection(self):
         period = self.sender().text()
         self.period_label.setText(f'Выбран период: {period}')
@@ -181,6 +193,9 @@ class Statistic(QWidget):
             self.handle_histogram_type_selection()
             
 
+    # Отслеживает нажатие на определенную кнопку и запоминает какой тип гистограммы выбран, а также собирает информацию с БД для этого типа
+    #
+    # Вызывается на 107, 193 строках
     def handle_histogram_type_selection(self):
         if self.period_label.text() == 'Выберите период:':
             self.error_label.setText('Выберите сначала период!')

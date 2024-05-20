@@ -21,7 +21,11 @@ from Frames.EventDialog import EventDialog
 from utlis import config_font, parse_holidays
 from datetime import datetime
 
+
+# Класс календаря
 class CalendarWidget(QCalendarWidget):
+    
+    # Инициализация параметров календаря
     def __init__(self, event_ids:list[Event]=None, calendar_id = None) -> None:
         super().__init__()
         self.setGridVisible(True)
@@ -36,7 +40,9 @@ class CalendarWidget(QCalendarWidget):
         self.tasks_days = [task.deadline.split()[0] for task in Task.select()]
         self.project_days = [project.deadline.split()[0] for project in Project.select()]
         self.days_list = [event.date.strftime("%Y-%m-%d") for event in self.events]
-        
+    
+    
+    # Переопределение метода класса QCalendarWidget для отрисовки заднего фона ячеек
     def paintCell(self, painter: QPainter, rect: QRect, date: QDate):
         painter.setRenderHint(QPainter.Antialiasing, True)
         
@@ -90,7 +96,11 @@ class CalendarWidget(QCalendarWidget):
             QCalendarWidget.paintCell(self, painter, rect, date)
         
 
+# Класс-виджет с календарем
+# Создается в модуле Ui_main_window.py на 81 строке
 class CalendarWindow(QWidget):
+    
+    # Инициализация всех виджетов внутри виджета с календарем
     def __init__(self, calendar_id):
         super().__init__()
         
@@ -138,6 +148,9 @@ class CalendarWindow(QWidget):
         self.setLayout(main_layout)
 
 
+    # Показывает информацию о дне на панельке справа от календаря
+    #
+    # Вызывается на 119 строке
     def show_date_info(self, date: QDate):
         
         for i in reversed(range(self.scroll_layout.count())):
@@ -233,14 +246,19 @@ class CalendarWindow(QWidget):
             self.scroll_area.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
             self.scroll_layout.addWidget(self.scroll_area)
             
-        
-        
-
+            
+    # Открывает окно с созданием нового события для дня 
+    #
+    # Вызывается на 141 строке
     def add_event(self):
         event = EventDialog(calendar_id=self.calendar_id, choosen_date=self.current_date)
         event.exec()
         if event.status:
             self.calendar.repaint(QRect())
         
+        
+    # Возвращает список событий из БД
+    #
+    # Вызывается на 115 строке
     def get_events_list(self):
         return list(Event.select().where(Event.calendar_id == self.calendar_id))

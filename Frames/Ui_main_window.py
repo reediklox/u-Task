@@ -28,8 +28,10 @@ from stylesheets.style import *
 from utlis import config_font
 
 
+# Основное окно приложения
 class Ui_MainWindow(QtWidgets.QMainWindow):
     
+    # Инициализатор основного окна (Объявление всех виджетов на основном экране)
     def __init__(self):
         super(Ui_MainWindow, self).__init__()
         
@@ -88,6 +90,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # End Main Tab Widget
         #########
         
+        #########
+        # QTabWidget inside MainTabWidget (Проекты)
         self.qTabWidgetInProjects = QTabWidget()
         self.qTabWidgetInProjects.setFont(config_font(16))
         self.qTabWidgetInProjects.setTabPosition(QTabWidget.TabPosition.East)
@@ -117,6 +121,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         projects_tab_layout.addWidget(self.qTabWidgetInProjects)
         projects_tab_layout.addLayout(horizonl_layout)
         
+        # End QTabWidget inside MainTabWidget (Проекты)
+        #########
+        
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.header)
         main_layout.addWidget(self.qTabWidget)
@@ -127,6 +134,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(central_widget)
         
     
+    # Открывает контекстное меню при клике ПКМ по проекту
+    # Вызывается на строках (344, 461)
     def project_context_menu(self, position: QPoint, button: QPushButton, project: Project):
         context_menu = QMenu(self)
         
@@ -140,12 +149,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         
         context_menu.exec_(button.mapToGlobal(position))
         
+    
+    # Обработка нажатия на пункт "Изменить" в контекстном меню проекта
     def project_update_action(self, project):
         project_update = ProjectDialog(WorkSpace.select().where(WorkSpace.name == self.qTabWidgetInProjects.tabBar().tabText(self.qTabWidgetInProjects.currentIndex())), True, project)
         project_update.exec()
         if project_update.status:
             self.update_tab(self.qTabWidgetInProjects.currentWidget())
-        
+            
+    
+    # Обработка нажатия на пункт "Удалить" в контекстном меню проекта
     def project_delete_action(self, project: Project):
         Project.delete_by_id(project.id)
         
@@ -155,7 +168,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 Task.delete_by_id(remain.id)
         
         self.update_tab(self.qTabWidgetInProjects.currentWidget())
+        
     
+    # Создание фильтра для вызова контекстного меню вкладки (Панель вкладок справа)
+    # Методы: Удалить вкладку;  Изменить название вкладки
+    #
+    # Задается на 112 строке
     def eventFilter(self, source, event):
         if event.type() == QEvent.ContextMenu:
             context_menu = QMenu(self)
@@ -175,6 +193,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         return super().eventFilter(source, event)
     
+    
+    # Изменение названия вкладки
+    # Открывает новое окно, где вписывается новое название
+    #
+    # Вызывается на 190 строке
     def rename_tab(self, index):
         dialog = QLineEdit(self.qTabWidgetInProjects.tabText(index))
         
@@ -195,16 +218,28 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         old_text = self.qTabWidgetInProjects.tabText(index)
         dialog.textChanged.connect(lambda text: self._rename(index, text))
         dialog.returnPressed.connect(lambda: self.close_dialog(dialog, old_text))
-        
+    
+    
+    # Закрытие диалогового окна изменения названия вкладки(При нажатии на Enter(Return))
+    #
+    # Вызывается на 220 строке
     def close_dialog(self, dialog, old_text):
         update = WorkSpace.update({WorkSpace.name: dialog.text()}).where(WorkSpace.name == old_text)
         update.execute()
         
         dialog.close()
     
+    
+    # Обновление текста вкладки (После каждого нажатия клавиши на клавиатуре)
+    #
+    # Вызывается на 219 строке
     def _rename(self, index, text):
         self.qTabWidgetInProjects.setTabText(index, text)
         
+        
+    # Процесс удаления вкладки
+    #
+    # Вызывается на 189 строке    
     def close_tab(self, index):
         old_text = self.qTabWidgetInProjects.tabText(index)
         try:
@@ -218,7 +253,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             for remain in remaining_projects:
                 self.project_delete_action(remain)
         self.qTabWidgetInProjects.removeTab(index)
+        
     
+    # Процесс создания новой вкладки (Нажатием на кнопку)
+    # Создаются все необходимы виджеты: Хедер с навигационными кнопками и ScrollArea со списком проектов
+    #
+    # Вызывается на 104 и 111 строках
+    # 104 строка - создаются вкладки при открытии приложения (Если они есть в БД)
+    # 111 строка - при нажатии на кнопку "+" создается строка со стандартным (неповторяющимся) названием
     def add_tab(self, board_id = None):
         count = self.qTabWidgetInProjects.count()
         
@@ -371,12 +413,20 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         
         self.qTabWidgetInProjects.addTab(new_tab, board.name)
     
+    
+    # При нажатии на кнопку поиск появляется список совпадений по введенному в поле справа
+    #~~ Технически эта кнопка бесполезна, так как при вводе текста в поле, леер с проектами обновляется динамически ~~#
+    #
+    # Вызывается на 315 строке
     def search_click(self, text):
         projects = Project.select().where(Project.name.contains(text))
         
         self.update_tab(self.qTabWidgetInProjects.currentWidget(), projects)
         
     
+    # Создается контекстное меню при нажатии на кнопку сортировки (Убывание (по дате), Возрастание (по дате), По названию)
+    #
+    # Вызывается на 327 строке
     def sort_menu(self, board):
         self.menu = QMenu(self.sort_button)
 
@@ -400,6 +450,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.sort_button.setMenu(self.menu)
 
 
+    # Скрипт для сортировки
+    #
+    # Вызывается на 446, 447, 448 строках
     def sort_action_triggered(self, action, board):
         if action == self.action_date_desc:
             projects = Project.select().where(Project.board_id == board.id).order_by(Project.deadline.desc())
@@ -411,6 +464,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.update_tab(self.qTabWidgetInProjects.currentWidget(), projects)
             
     
+    # Обновление леера с проектами, при каком либо действии, связанном с проектами (Добавление, Поиск, Сортировка)
+    #
+    # Вызывается на 158, 170, 424, 464, 543 строках
     def update_tab(self, tab_widget: QWidget, projects=None):
         grid_layout = tab_widget.findChild(QGridLayout)
 
@@ -479,14 +535,19 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             grid_layout.addWidget(no_projects_label, 1, 0, alignment=Qt.AlignmentFlag.AlignCenter)
             
     
-        
+    # Открытие меню для добавления нового проекта
+    #
+    # Вызывается на 321 строке
     def addProject(self, board_id, index):
         pr_dialog = ProjectDialog(board_id)
         pr_dialog.exec()
         if pr_dialog.status:
             self.update_tab(self.qTabWidgetInProjects.widget(index))
             
-            
+    
+    # Открытие меню с информацие о проекте
+    #
+    # Вызывается на 380 строке 
     def project_menu(self, project):
         print('Проект: ', project)
         ProjectWindow(project)

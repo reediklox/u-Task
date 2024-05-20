@@ -16,6 +16,7 @@ from utlis import config_font
 from datetime import datetime
 
 
+# Класс диалоговое окно для создания новых / изменения существующих проектов
 class ProjectDialog(QDialog):
     def __init__(self, board_id, is_update=False, project=None):
         super().__init__()
@@ -179,6 +180,8 @@ class ProjectDialog(QDialog):
         self.setLayout(layout)
         self.show()
         
+        
+    # Обработка нажатия на кнопку "Закрыть окно" (крестик)
     def closeEvent(self, event):
         if self.status == True:
             event.accept()
@@ -192,7 +195,11 @@ class ProjectDialog(QDialog):
                 event.accept()
             else:
                 event.ignore()
-                
+    
+    
+    # Обновление проекта при нажатии на кнопку "Обновить"
+    #
+    # Вызывается на 167 строке
     def update_project(self):
         start_date, deadline = self.get_date_from_checkboxes()
         spend_time_total = int(self.hours_spinbox.text()) / int(self.hours_spinbox_day.text())
@@ -215,7 +222,11 @@ class ProjectDialog(QDialog):
         
         self.status = True
         self.close()
-
+        
+    
+    # Добавление нового проекта при нажатии на кнопку "Добавить"
+    #
+    # Вызывается на 161 строке
     def add_task(self):
         print("Добавление задачи...")
         self.title_edit.setStyleSheet('''
@@ -253,7 +264,11 @@ class ProjectDialog(QDialog):
                            )
             self.status = True
             self.close()
-        
+    
+    
+    # Возвращает дату в формате datetime из checkbox для выбора дат
+    #
+    # Вызывается на 204, 246 строках
     def get_date_from_checkboxes(self):
         day = self.get_checkbox_value(self.start_day_combo)
         month = self.get_checkbox_value(self.start_month_combo)
@@ -267,6 +282,8 @@ class ProjectDialog(QDialog):
         deadline_str = f'{deadline_day.currentText()}.{deadline_month.currentText()}.{deadline_year.currentText()}'
         return datetime.strptime(date_str, "%d.%m.%Y"), datetime.strptime(deadline_str, "%d.%m.%Y")
 
+    
+    # Возвращает значение checkbox
     def get_checkbox_value(self, checkbox):
         if checkbox:
             return checkbox
